@@ -2,7 +2,13 @@
 
 <+>5 5 20 1 43</+>
 <+></+>
-<define><test></test><+>1 5</+></define><test></test>
-
+<define><test></test><+>1 5</+></define>
+<test></test>
 <λ x>x</λ>
 <+>1 2</+><+>2 3</+><->432 32</->
+
+<string-append>
+"hello" "world"
+</string-append>
+
+<print>"test"</print>

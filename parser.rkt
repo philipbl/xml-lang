@@ -142,43 +142,20 @@
    'parse-error 
    (format "open tag (~a) and close tag (~a) don't match" a b)))
 
+(define (my-substring s to from-back)
+  (substring s to (- (string-length s) from-back)))
+
 (define (convert-comment c)
-  (string-append ";" 
-                 (substring c 4 (- (string-length c) 3))))
+  (string-append ";"
+                 (my-substring c 4 3)))
 
 (define (convert-string s)
-  (substring s 1 (- (string-length s) 1)))
+  (my-substring s 1 1))
 
 (define current-source (make-parameter #f))
 
 (define parse
-  (parser
-   #;[grammar 
-      (start [(exprs) $1])
-      (exprs [(comment) (convert-comment $1)]
-             [(expr) $1]
-             [(expr exprs) `(,$1 ,$2)])
-      (expr  [(open-id close-id) (if (same-tags? $1 $2)
-                                     `(,@(split-param $1))
-                                     (match-error $1 $2))]
-             
-             [(open-id args close-id) (if (same-tags? $1 $3)
-                                          `(,@(split-param $1) ,@(flatten $2))
-                                          (match-error $1 $3))]
-             
-             [(open-id exprs close-id) (if (same-tags? $1 $3)
-                                           `(,@(split-param $1) ,$2)
-                                           (match-error $1 $3))])
-      
-      (args [(arg)         $1]
-            [(arg args)    `(,$1 ,$2)]
-            [(num)         $1]
-            [(num args)    `(,$1 ,$2)]
-            [(string)      $1]
-            [(string args) `(,$1 ,$2)])]
-   
-   
-   
+  (parser   
    [grammar 
     (start [(exprs) $1])
     (exprs [(expr) (list (add-srcloc $1 $1-start-pos $1-end-pos))]
@@ -237,20 +214,6 @@
 
 #;(run-parser "<!-- test -->")
 
-#;(check-equal? (run-parser "<test></test>")
-                '(test))
-#;(check-equal? (run-parser "<test1>a b c d e f g</test1>")
-                '(test1 a b c d e f g))
-#;(check-equal? (run-parser "<test1><test2></test2></test1>")
-                '(test1 (test2)))
-#;(check-equal? (run-parser "<λ x>x</λ>")
-                '(λ (x) x))
-
-#;(run-parser "<define>
-    <test>
-        <+>1 2</+>
-    </test>
-</define>")
 
 #;(run-parser   "<map>
 \t<lambda x>

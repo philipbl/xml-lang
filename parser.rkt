@@ -134,7 +134,7 @@
   (let ([params? (string-split (symbol->string open))])
     (match params?
       [`(,id)                `(,(string->symbol id))]
-      [`(,id ,params ...)    `(,(string->symbol id) ,(map string->symbol params))]
+      [`(,id ,params ...)    `(,(string->symbol id) ,@(map string->symbol params))]
       [_                     'error])))
 
 (define (match-error a b)
@@ -212,6 +212,10 @@
 (run-parser "<+>1 2</+><+>2 3</+><->432 32</->")
 (run-parser "<string-append>\"foo\" \"bar\"</string-append>")
 
+(run-parser "<define x 5></define>")
+
+#;(run-parser "<define><test a></test><+>a 2</+></define>")
+#;(run-parser "<test1 5></test1>")
 #;(run-parser "<!-- test -->")
 
 

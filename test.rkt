@@ -12,3 +12,6 @@
 </string-append>
 
 <print>"test"</print>
+
+<define><test1 a></test1><+>a 2</+></define>
+<define><x></x>5</define>

@@ -1,17 +1,8 @@
 #lang reader "xml-lang.rkt"
 
-<+>5 5 20 1 43</+>
+<+>1 2</+>
+<+>5 1 10</+>
 <+></+>
-<define><test></test><+>1 5</+></define>
-<test></test>
-<λ x>x</λ>
-<+>1 2</+><+>2 3</+><->432 32</->
-
-<string-append>
-"hello" "world"
-</string-append>
-
-<print>"test"</print>
-
-<define><test1 a></test1><+>a 2</+></define>
-<define><x></x>5</define>
+<define><test></test><+>1 2</+></define><test></test>
+<string-append>"foo" "bar"</string-append>
+<define><test1 a></test1><+>a 2</+></define><test1 5></test1>

@@ -4,6 +4,8 @@
          parser-tools/yacc
          rackunit)
 
+(provide xml-read xml-read-syntax)
+
 (define-namespace-anchor anc)
 (define ns (namespace-anchor->namespace anc))
 
@@ -148,11 +150,13 @@
     (exprs [(expr) (list (add-srcloc $1 $1-start-pos $1-end-pos))]
            [(expr exprs) (cons (add-srcloc $1 $1-start-pos $1-end-pos) $2)])
     
-    (expr [(open-tag close-tag)        `(,$1)]
+    (expr [(open-tag close-tag)        $1]
           [(open-tag params close-tag) `(,$1 ,@$2)]
           [(open-tag exprs close-tag)  (cons $1 $2)])
     
-    (open-tag [(open-open-id id close-id) (string->symbol $2)])
+    (open-tag [(open-open-id id close-id) (string->symbol $2)]
+              [(open-open-id id params close-id) `(,(string->symbol $2) ,@$3)])
+    
     (close-tag [(close-open-id id close-id) (string->symbol $2)])
     
     (params [(id)           `(,(string->symbol $1))]
@@ -189,10 +193,24 @@
     (parse (λ () (lex p)))))
 
 
-(run-parser "<+>1 2</+>")
-(run-parser "<+>5 1 10</+>")
-(run-parser "<+></+>")
-(run-parser "<test1>a b c d e f g</test1>")
-(run-parser "<define><test></test><+>1 2</+></define>")
-(run-parser "<string-append>\"foo\" \"bar\"</string-append>")
+;(run-parser "<+>1 2</+>")
+;(run-parser "<+>5 1 10</+>")
+;(run-parser "<+></+>")
+;(run-parser "<test1>a b c d e f g</test1>")
+;(run-parser "<define><test></test><+>1 2</+></define>")
+;(run-parser "<string-append>\"foo\" \"bar\"</string-append>")
+;(run-parser "<test1 a></test1>")
+(run-parser "<define><test1 a></test1><+>a 2</+></define>")
 ;(run-parser "<string-append>\"hello world\" \"foobar\"</string-append>")
+;(run-parser "<!-- test -->")
+
+(define (run-p src p)
+  (parameterize ([current-source src])
+    (parse (λ () (lex p)))))
+
+(define (xml-read [port (current-input-port)])
+  (syntax->datum (run-p #f port)))
+
+(define (xml-read-syntax [name #f] [port (current-input-port)])
+  (run-p (or name (object-name port))
+         port))

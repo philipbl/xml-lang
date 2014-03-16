@@ -150,12 +150,13 @@
     (exprs [(expr) (list (add-srcloc $1 $1-start-pos $1-end-pos))]
            [(expr exprs) (cons (add-srcloc $1 $1-start-pos $1-end-pos) $2)])
     
-    (expr [(open-tag close-tag)        $1]
-          [(open-tag params close-tag) `(,$1 ,@$2)]
-          [(open-tag exprs close-tag)  (cons $1 $2)])
+    (expr [(open-tag close-tag)        `(,@$1)]
+          [(open-tag params close-tag) `(,@$1 ,@$2)])
     
-    (open-tag [(open-open-id id close-id) (string->symbol $2)]
+    (open-tag [(open-open-id id close-id)        `(,(string->symbol $2))]
               [(open-open-id id params close-id) `(,(string->symbol $2) ,@$3)])
+                       ; be careful of params here, shouldn't be able to have
+                       ; an open tag
     
     (close-tag [(close-open-id id close-id) (string->symbol $2)])
     
@@ -164,7 +165,9 @@
             [(num)          `(,$1)]
             [(num params)    (cons $1 $2)]
             [(string)       `(,(string-> $1))]
-            [(string params) (cons (string-> $1) $2)])]
+            [(string params) (cons (string-> $1) $2)]
+            [(expr)         `(,$1)]
+            [(expr params)   (cons $1 $2)])]
    
    [tokens empty-tokens tokens]
    [start start]
@@ -200,9 +203,23 @@
 ;(run-parser "<define><test></test><+>1 2</+></define>")
 ;(run-parser "<string-append>\"foo\" \"bar\"</string-append>")
 ;(run-parser "<test1 a></test1>")
-(run-parser "<define><test1 a></test1><+>a 2</+></define>")
+;(run-parser "<define><test1 a></test1><+>a 2</+></define>")
 ;(run-parser "<string-append>\"hello world\" \"foobar\"</string-append>")
 ;(run-parser "<!-- test -->")
+#;(run-parser "<map>
+  test1
+  <list>1 2 3</list>
+</map>")
+(run-parser "<map>
+  <lambda x>
+    <+>
+      x x
+    </+>
+  </lambda>
+  <list>
+    1 2 3
+  </list>
+</map>")
 
 (define (run-p src p)
   (parameterize ([current-source src])

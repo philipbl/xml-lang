@@ -140,6 +140,14 @@
 (define (string-> s)
   (substring s 1 (- (string-length s) 1)))
 
+(define (tag-match? start end)
+  (equal? start end))
+
+(define (match-error a b)
+  (error 
+   'parse-error 
+   (format "open tag (~a) and close tag (~a) don't match" a b)))
+
 (define parse
   (parser   
    [grammar 
@@ -147,13 +155,21 @@
     (exprs [(expr) (list (add-srcloc $1 $1-start-pos $1-end-pos))]
            [(expr exprs) (cons (add-srcloc $1 $1-start-pos $1-end-pos) $2)])
     
-    (expr [(open-open-id id close-id close-tag)               `(,(string->symbol $2))]
-          [(open-open-id id params close-id close-tag)        `(,(string->symbol $2) ,@$3)]
-          [(open-open-id id close-id params close-tag)        `(,(string->symbol $2) ,@$4)]
-          [(open-open-id id params close-id params close-tag) `(,(string->symbol $2) ,$3 ,@$5)])
+    (expr [(open-open-id id close-id close-tag)               (if (tag-match? $2 $4)
+                                                                     `(,(string->symbol $2))
+                                                                     (match-error $2 $4))]
+          [(open-open-id id params close-id close-tag)        (if (tag-match? $2 $5)
+                                                                     `(,(string->symbol $2) ,@$3)
+                                                                     (match-error $2 $5))]
+          [(open-open-id id close-id params close-tag)        (if (tag-match? $2 $5)
+                                                                     `(,(string->symbol $2) ,@$4)
+                                                                     (match-error $2 $5))]
+          [(open-open-id id params close-id params close-tag) (if (tag-match? $2 $6)
+                                                                     `(,(string->symbol $2) ,$3 ,@$5)
+                                                                     (match-error $2 $6))])
     ; be careful of params here, shouldn't be able to have an open tag
     
-    (close-tag [(close-open-id id close-id) (string->symbol $2)])
+    (close-tag [(close-open-id id close-id) $2])
     
     (params [(id)           `(,(string->symbol $1))]
             [(id params)     (cons (string->symbol $1) $2)]

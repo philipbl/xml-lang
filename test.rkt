@@ -16,12 +16,13 @@
 
 <map>
   <lambda x>
+<!-- test -->
     <+>
-      x x
+      x x <!-- test -->
     </+>
+<!-- test -->
   </lambda>
   <list>
     1 2 3
   </list>
 </map>
-

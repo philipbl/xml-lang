@@ -150,13 +150,11 @@
     (exprs [(expr) (list (add-srcloc $1 $1-start-pos $1-end-pos))]
            [(expr exprs) (cons (add-srcloc $1 $1-start-pos $1-end-pos) $2)])
     
-    (expr [(open-tag close-tag)        `(,@$1)]
-          [(open-tag params close-tag) `(,@$1 ,@$2)])
-    
-    (open-tag [(open-open-id id close-id)        `(,(string->symbol $2))]
-              [(open-open-id id params close-id) `(,(string->symbol $2) ,@$3)])
-                       ; be careful of params here, shouldn't be able to have
-                       ; an open tag
+    (expr [(open-open-id id close-id close-tag)               `(,(string->symbol $2))]
+          [(open-open-id id params close-id close-tag)        `(,(string->symbol $2) ,@$3)]
+          [(open-open-id id close-id params close-tag)        `(,(string->symbol $2) ,@$4)]
+          [(open-open-id id params close-id params close-tag) `(,(string->symbol $2) ,$3 ,@$5)])
+    ; be careful of params here, shouldn't be able to have an open tag
     
     (close-tag [(close-open-id id close-id) (string->symbol $2)])
     
@@ -210,7 +208,7 @@
   test1
   <list>1 2 3</list>
 </map>")
-(run-parser "<map>
+#;(run-parser "<map>
   <lambda x>
     <+>
       x x

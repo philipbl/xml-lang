@@ -10,12 +10,10 @@
 (define ns (namespace-anchor->namespace anc))
 
 
-(define-tokens tokens (id parameter arg num string comment))
+(define-tokens tokens (id parameter arg num string))
 (define-empty-tokens empty-tokens (open-open-id 
                                    close-id 
                                    close-open-id  
-                                   open-comment 
-                                   close-comment
                                    quote
                                    eoft))
 
@@ -25,15 +23,15 @@
          ;(:~ "/") 
          (complement (:: any-string (:or ">" "<" "</" "\"" whitespace) any-string)))]
   [number (:+ (:/ #\0 #\9))]
-  [string (:: #\" (complement (:: any-string (:or #\") any-string)) #\")])
+  [string (:: #\" (complement (:: any-string (:or #\") any-string)) #\")]
+  [comment (:: "<!--" (complement (:: any-string (:or "-->") any-string)) "-->")])
 
 (define lex
   (lexer-src-pos
+   [comment          (return-without-pos (lex input-port))]
    [(:: "<")         (token-open-open-id)]
    [(:: ">")         (token-close-id)]
    [(:: "</")        (token-close-open-id)]
-   [(:: "<!--")      (token-open-comment)]
-   [(:: "-->")       (token-close-comment)]
    [string           (token-string lexeme)]
    [number           (token-num (string->number lexeme))]
    [id               (token-id lexeme)]
@@ -102,16 +100,15 @@
               '(eoft))
 
 (check-equal? (str->toks "<!-- this is a test -->")
-              '(open-comment id id id id close-comment eoft))
+              '(eoft))
 
 (check-equal? (str->toks "<!-- foo --><bar></bar>")
-              '(open-comment id close-comment open-open-id id close-id close-open-id id close-id eoft))
+              '(open-open-id id close-id close-open-id id close-id eoft))
 
 (check-equal? (str->toks "<bar><!-- foo --></bar>")
-              '(open-open-id id close-id open-comment id close-comment close-open-id id close-id eoft))
+              '(open-open-id id close-id close-open-id id close-id eoft))
 
-; (map (lambda (x) (+ x x)) '(1 2 3))
-#;(check-equal? 
+(check-equal? 
  (str->toks 
   "<map>
 \t<lambda x>

@@ -38,10 +38,6 @@
    [(:+ whitespace)  (return-without-pos (lex input-port))]
    [(eof)            (token-eoft)]))
 
-(define string-lex
-  (lexer
-   [(:: any-string #\")    lexeme]))
-
 
 ; Used for testing
 (define (str->toks str)
@@ -167,7 +163,6 @@
           [(open-open-id id params close-id params close-tag) (if (tag-match? $2 $6)
                                                                      `(,(string->symbol $2) ,$3 ,@$5)
                                                                      (match-error $2 $6))])
-    ; be careful of params here, shouldn't be able to have an open tag
     
     (close-tag [(close-open-id id close-id) $2])
     
@@ -231,6 +226,13 @@
     1 2 3
   </list>
 </map>")
+
+(run-parser "<require>
+  parser-tools/lex
+  <prefix-in : parser-tools/lex-sre></prefix-in>
+  parser-tools/yacc
+  racketunit
+</require>")
 
 (define (run-p src p)
   (parameterize ([current-source src])

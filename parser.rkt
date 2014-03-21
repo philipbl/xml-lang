@@ -101,6 +101,9 @@
 (check-equal? (str->toks "<bar><!-- foo --></bar>")
               '(open-open-id id close-id close-open-id id close-id eoft))
 
+#;(check-equal? (str->toks "<!-- test \"-->\" test -->")
+              '(eoft))
+
 (check-equal? 
  (str->toks 
   "<map>
@@ -155,7 +158,8 @@
                                                                      `(,(string->symbol $2) ,@$4)
                                                                      (match-error $2 $5))]
           
-          [(open-open-id close-id params close-open-id close-id) `(,@$3)])
+          [(open-open-id close-id params close-open-id close-id) `(,@$3)]
+          [(open-open-id close-id close-open-id close-id)        `()])
     
     (close-tag [(close-open-id id close-id) $2])
     
@@ -203,7 +207,7 @@
 ;(run-parser "<string-append>\"foo\" \"bar\"</string-append>")
 ;(run-parser "<test1 a></test1>")
 ;(run-parser "<define><test1 a></test1><+>a 2</+></define>")
-(run-parser "<><lambda><x></x><+>x x</+></lambda> 4</>")
+;(run-parser "<><lambda><x></x><+>x x</+></lambda> 4</>")
 ;(run-parser "<string-append>\"hello world\" \"foobar\"</string-append>")
 ;(run-parser "<!-- test -->")
 #;(run-parser "<map>
@@ -227,6 +231,14 @@
   parser-tools/yacc
   racketunit
 </require>")
+
+#;(run-parser "<define-syntax>
+  <-)>stx</-)>
+  <syntax-case>
+    stx <></>
+    <><_>x</_>  #'x</>
+  </syntax-case>
+</define-syntax>")
 
 (define (run-p src p)
   (parameterize ([current-source src])

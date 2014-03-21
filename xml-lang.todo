@@ -1,0 +1,11 @@
+Lexor/Parser:
+ ✔ Remove arguments inside of open tags @done (2014-03-21 10:32)
+   <x arg1 arg2 ...></x>
+ ✔ Allow for empty tags @done (2014-03-21 10:34)
+   ((lambda (x) (+x x))) → <><lambda><x></x><+>x x</+></lambda></>
+
+
+Other:
+ ☐ Come up with solid examples
+ ☐ Finish writing documentation
+ ☐ Write article on xml-lang

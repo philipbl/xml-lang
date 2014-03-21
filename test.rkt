@@ -1,5 +1,7 @@
 #lang reader "xml-lang.rkt"
 
+<><lambda><x></x><+>x x</+></lambda> 4</>
+
 <+>1 2</+>
 <+>5 1 10</+>
 <+></+>
@@ -24,5 +26,6 @@
     1 2 3
   </list>
 </map>
+
 
 

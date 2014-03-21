@@ -18,10 +18,7 @@
                                    eoft))
 
 (define-lex-abbrevs
-  [id   (:: ;(:& (:~ "<") (:~ ">") (:~ #\"))
-         ;(:& (:~ "<") (:~ ">"))
-         ;(:~ "/") 
-         (complement (:: any-string (:or ">" "<" "</" "\"" whitespace) any-string)))]
+  [id   (:: (complement (:: any-string (:or ">" "<" "</" "\"" whitespace) any-string)))]
   [number (:+ (:/ #\0 #\9))]
   [string (:: #\" (complement (:: any-string (:or #\") any-string)) #\")]
   [comment (:: "<!--" (complement (:: any-string (:or "-->") any-string)) "-->")])
@@ -123,8 +120,8 @@
                 close-open-id id close-id close-open-id id close-id
                 eoft))
 
-#;(check-equal? (str->toks "<+>1 2 \"test\"</+>")
-              '(open-open-id id close-id num num string close-open-id id close-id eoft))
+(check-equal? (str->toks "<></>") 
+              '(open-open-id close-id close-open-id close-id eoft))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -154,15 +151,11 @@
     (expr [(open-open-id id close-id close-tag)               (if (tag-match? $2 $4)
                                                                      `(,(string->symbol $2))
                                                                      (match-error $2 $4))]
-          [(open-open-id id params close-id close-tag)        (if (tag-match? $2 $5)
-                                                                     `(,(string->symbol $2) ,@$3)
-                                                                     (match-error $2 $5))]
           [(open-open-id id close-id params close-tag)        (if (tag-match? $2 $5)
                                                                      `(,(string->symbol $2) ,@$4)
                                                                      (match-error $2 $5))]
-          [(open-open-id id params close-id params close-tag) (if (tag-match? $2 $6)
-                                                                     `(,(string->symbol $2) ,$3 ,@$5)
-                                                                     (match-error $2 $6))])
+          
+          [(open-open-id close-id params close-open-id close-id) `(,@$3)])
     
     (close-tag [(close-open-id id close-id) $2])
     
@@ -210,6 +203,7 @@
 ;(run-parser "<string-append>\"foo\" \"bar\"</string-append>")
 ;(run-parser "<test1 a></test1>")
 ;(run-parser "<define><test1 a></test1><+>a 2</+></define>")
+(run-parser "<><lambda><x></x><+>x x</+></lambda> 4</>")
 ;(run-parser "<string-append>\"hello world\" \"foobar\"</string-append>")
 ;(run-parser "<!-- test -->")
 #;(run-parser "<map>
@@ -227,7 +221,7 @@
   </list>
 </map>")
 
-(run-parser "<require>
+#;(run-parser "<require>
   parser-tools/lex
   <prefix-in : parser-tools/lex-sre></prefix-in>
   parser-tools/yacc
